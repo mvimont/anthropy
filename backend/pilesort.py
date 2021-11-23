@@ -53,45 +53,40 @@ class Pilesort:
         
         Params:
             self (Pilesort)
-            grouping (tuple if self.groupings not empty, str if self.groupings is empty)
-        """ 
-        try:
-            if grouping in self.groupings:
-                grouping_index = self.groupings.index(grouping)
-                new_grouping = list(grouping)
-            else:
-                new_grouping = [grouping]
-                self.freelist.remove(grouping)
-            if isinstance(item, tuple):
-                new_grouping.extend(list(item))
-            else:
-                new_grouping.append(item)
-            new_grouping = tuple(new_grouping)
+            grouping (tuple if len(freelist) <= 1, else str)
+        """
+        groupings = list(self.groupings)
+        new_group = list()
+        if item in groupings:
+            if len(self.freelist) >= 1:
+                self.logger.warning("Warning: All items must be in a group before multiple groups can be combined")
+                return
+            groupings.remove(item)
+            new_group.extend(item)
+        else:
             self.remove_freelist_item(item)
-            if isinstance(grouping, tuple):
-                new_groups = list(self.groupings[grouping_index])
-                del new_groups[grouping_index]
-                new_groups[grouping_index] = new_grouping
-                self.groupings = new_groups
-            else:
-                new_groups = []
-                new_groups.append(new_grouping)
-                self.groupings = new_groups
-            self._increment_matrix_pairs()
-        except Exception as e:
-            raise self.logger.critical("Fatal exception adding item to grouping: %s", e)
+            new_group.append(item)
+        if grouping in self.groupings:
+            new_group.extend(grouping)
+            groupings.remove(grouping)
+        else:
+            new_group.append(grouping)
+            self.remove_freelist_item(grouping)
+        groupings.append(tuple(new_group))
+        self.groupings = groupings
+        self._increment_matrix_pairs()
 
     def _increment_matrix_pairs(self):
         for item in self.orig_freelist:
-            self.dist_matrix[item][item] += 1   
+            self.dist_matrix[item][item] += 1
         for grouping in self.groupings:
-            combinations = permutations(grouping)
-            for combo in combinations:
-                self.dist_matrix[combo[0]][combo[1]] += 1
-                #first = combo[0]
-                #for item in combo:
-                #    if item != first:
-                #        self.dist_matrix[first][item] += 1
+            combinations = self._all_possible_pairs(grouping)
+            for first, second in combinations:
+                self.dist_matrix[first][second] += 1
+                self.dist_matrix[second][first] += 1
+
+    def _all_possible_pairs(self, l):
+        return [(a, b) for idx, a in enumerate(l) for b in l[idx + 1:]]             
 
     def _check_valid_item_to_grouping(self, grouping, item):
         if not self.groupings:
@@ -130,8 +125,8 @@ class Pilesort:
 
 if __name__=='__main__':
     ps = Pilesort()
-    ps.add_freelist_item('hello')
-    ps.add_freelist_item('howdy')
-    ps.add_freelist_item('goodbye')
+    items = ['cow', 'horse', 'grass', 'hay', 'straw']
+    for i in items:
+        ps.add_freelist_item(i)
     ps.finalize_freelist()
     ps.add_freelist_item_to_grouping('hello', 'howdy')

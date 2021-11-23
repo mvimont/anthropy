@@ -8,7 +8,7 @@ class App(tk.Tk):
         tk.Tk.__init__(self)
         self.title('AnthroPy')
         self.geometry('1000x600')
-        self.tk.call('wm', 'iconphoto', self._w, tk.PhotoImage(file='media/anthropy.png'))
+        #self.tk.call('wm', 'iconphoto', self._w, tk.PhotoImage(file='media/anthropy.png'))
         self.pilesort = Pilesort()
         self._frame = None
         self.switch_frame(HomePage)
