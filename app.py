@@ -7,7 +7,8 @@ class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self.title('AnthroPy')
-        self.geometry('500x500')
+        self.geometry('1000x600')
+        self.tk.call('wm', 'iconphoto', self._w, tk.PhotoImage(file='media/anthropy.png'))
         self.pilesort = Pilesort()
         self._frame = None
         self.switch_frame(HomePage)
@@ -17,7 +18,7 @@ class App(tk.Tk):
         if self._frame is not None:
             self._frame.destroy()
         self._frame = new_frame
-        self._frame.pack()
+        self._frame.place(relwidth=1, relheight=1)
 
 if __name__ == "__main__":
     app = App()

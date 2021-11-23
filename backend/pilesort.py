@@ -43,6 +43,8 @@ class Pilesort:
 
     def _init_dist_matrix(self):
         self.dist_matrix = pd.DataFrame(0, columns=list(self.freelist), index=list(self.freelist))
+        for item in self.orig_freelist:
+            self.dist_matrix[item][item] += 1
 
     def add_freelist_item_to_grouping(self, grouping, item):
         """
@@ -51,10 +53,8 @@ class Pilesort:
         
         Params:
             self (Pilesort)
-            grouping (tuple if self.groupings not empty, str if self.groupings is not empty)
+            grouping (tuple if self.groupings not empty, str if self.groupings is empty)
         """ 
-        if not self._check_valid_item_to_grouping(grouping, item):
-            return
         try:
             if grouping in self.groupings:
                 grouping_index = self.groupings.index(grouping)
@@ -62,25 +62,36 @@ class Pilesort:
             else:
                 new_grouping = [grouping]
                 self.freelist.remove(grouping)
-            new_grouping.append(item)
+            if isinstance(item, tuple):
+                new_grouping.extend(list(item))
+            else:
+                new_grouping.append(item)
             new_grouping = tuple(new_grouping)
             self.remove_freelist_item(item)
-            if isinstance(grouping, list):
-                self.groupings[grouping_index] = new_grouping
+            if isinstance(grouping, tuple):
+                new_groups = list(self.groupings[grouping_index])
+                del new_groups[grouping_index]
+                new_groups[grouping_index] = new_grouping
+                self.groupings = new_groups
             else:
-                self.groupings.append(new_grouping)
+                new_groups = []
+                new_groups.append(new_grouping)
+                self.groupings = new_groups
             self._increment_matrix_pairs()
         except Exception as e:
             raise self.logger.critical("Fatal exception adding item to grouping: %s", e)
 
     def _increment_matrix_pairs(self):
+        for item in self.orig_freelist:
+            self.dist_matrix[item][item] += 1   
         for grouping in self.groupings:
             combinations = permutations(grouping)
             for combo in combinations:
-                first = combo[0]
-                for item in combo:
-                    self.dist_matrix[first][item] += 1
-                    self.dist_matrix[item][first] += 1
+                self.dist_matrix[combo[0]][combo[1]] += 1
+                #first = combo[0]
+                #for item in combo:
+                #    if item != first:
+                #        self.dist_matrix[first][item] += 1
 
     def _check_valid_item_to_grouping(self, grouping, item):
         if not self.groupings:
