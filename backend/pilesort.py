@@ -122,11 +122,3 @@ class Pilesort:
         if not valid:
             self.logger.warning("Invalid grouping: %s is not in groupings", grouping)
         return valid
-
-if __name__=='__main__':
-    ps = Pilesort()
-    items = ['cow', 'horse', 'grass', 'hay', 'straw']
-    for i in items:
-        ps.add_freelist_item(i)
-    ps.finalize_freelist()
-    ps.add_freelist_item_to_grouping('hello', 'howdy')

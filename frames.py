@@ -3,19 +3,22 @@ from tkinter import IntVar, ttk
 import tkinter as tk
 from pandastable import Table
 
-frame_logger = logging.getLogger("FrameLogger")
-
-class HomePage(tk.Frame):
+class BaseFrame(tk.Frame):
     def __init__(self, container):
         tk.Frame.__init__(self, container)
+        self.logger=logging.getLogger("FrameLogger")
+
+class HomePage(BaseFrame):
+    def __init__(self, container):
+        super().__init__(container)
         tk.Label(self, text="Welcome to AnthroPy", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.25)
         tk.Button(self, text="Create new freelist",
                   command=lambda: container.switch_frame(FreeList)).place(relheight=0.1, relwidth=0.80, relx=0.1, rely=0.5)
         
 
-class FreeList(tk.Frame):
+class FreeList(BaseFrame):
     def __init__(self, container):
-        tk.Frame.__init__(self, container)
+        super().__init__(container)
         tk.Label(self, text="Create a freelist", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.1)
         self.current_items = tk.Label(self, text=f"Current Items: {container.pilesort.freelist if len(container.pilesort.freelist) > 0 else None}")
         self.current_items.place(relheight=0.1, relwidth=1, rely=0.2)
@@ -45,9 +48,9 @@ class FreeList(tk.Frame):
         container.pilesort.finalize_freelist()
         container.switch_frame(PilesortFrame)
 
-class PilesortFrame(tk.Frame):
+class PilesortFrame(BaseFrame):
     def __init__(self, container):
-        tk.Frame.__init__(self, container)
+        super().__init__(container)
         tk.Label(self, text="Pilesort Grouping", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.1)
         tk.Label(self, text=f"Original freelist: {container.pilesort.freelist}").place(relheight=0.1, relwidth=1, rely=0.2)
         self.generate_item_box(container)
@@ -96,7 +99,7 @@ class PilesortFrame(tk.Frame):
         selected_groups = [k for k, v in self.group_box.check_vars.items() if v.get() == 1] 
         selection = list(set(selected_items + selected_groups))
         if len(selection) != 2:
-            frame_logger.error("Invalid select, only two selections allowed. %d chosen", len(selection))
+            self.frame_logger.error("Invalid select, only two selections allowed. %d chosen", len(selection))
             return
         submitted_select = []
         if len(selected_items) == 1:
@@ -117,9 +120,9 @@ class PilesortFrame(tk.Frame):
             self.generate_item_box(container)
             self.generate_group_box(container)
 
-class ResultsPage(tk.Frame):
+class ResultsPage(BaseFrame):
     def __init__(self, container):
-        tk.Frame.__init__(self, container)
+        super().__init__(container)
         tk.Label(self, text="Distance Matrix", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.1)
         df = container.pilesort.dist_matrix
         df.insert(0, '', (list(df.index)))
