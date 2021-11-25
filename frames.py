@@ -3,8 +3,6 @@ from tkinter import IntVar, ttk
 import tkinter as tk
 from pandastable import Table
 
-from backend.pilesort import Pilesort
-
 frame_logger = logging.getLogger("FrameLogger")
 
 class HomePage(tk.Frame):
@@ -43,7 +41,6 @@ class FreeList(tk.Frame):
                   command=lambda: self.start_pilesort(container))
         self.pilesort_button.place(relheight=0.1, relwidth=0.3, rely=0.9, relx=0.35)      
         
-    
     def start_pilesort(self, container):
         container.pilesort.finalize_freelist()
         container.switch_frame(PilesortFrame)
