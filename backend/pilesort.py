@@ -38,10 +38,19 @@ class Pilesort:
             self.logger.warning("Item %s does not exist in freelist", item)
     
     def finalize_freelist(self):
+        """
+        Once freelist finished,
+        generates copy of original
+        and initializes distance matrix
+        """
         self.orig_freelist = deepcopy(self.freelist)
         self._init_dist_matrix()
 
     def _init_dist_matrix(self):
+        """
+        Based on freelist, constructs distance matrix,
+        incrementing each identical item by 1
+        """
         self.dist_matrix = pd.DataFrame(0, columns=list(self.freelist), index=list(self.freelist))
         for item in self.orig_freelist:
             self.dist_matrix[item][item] += 1
@@ -49,7 +58,7 @@ class Pilesort:
     def add_freelist_item_to_grouping(self, grouping, item):
         """
         Add item/entity to grouping.
-        At beginning 'grouping' will also be another 'item'
+        A 'grouping' can also be another 'item'
         
         Params:
             self (Pilesort)
@@ -77,6 +86,10 @@ class Pilesort:
         self._increment_matrix_pairs()
 
     def _increment_matrix_pairs(self):
+        """
+        Increments value of all grouped items
+        by one.
+        """
         for item in self.orig_freelist:
             self.dist_matrix[item][item] += 1
         for grouping in self.groupings:
@@ -86,15 +99,14 @@ class Pilesort:
                 self.dist_matrix[second][first] += 1
 
     def _all_possible_pairs(self, l):
+        """
+        PARAMS:
+            self(Pilesort)
+            l: List of items
+        RETURNS:
+            (list): all possible pairs in list l
+        """
         return [(a, b) for idx, a in enumerate(l) for b in l[idx + 1:]]             
-
-    def _check_valid_item_to_grouping(self, grouping, item):
-        if not self.groupings:
-            grouping_is_valid = self._check_item_in_freelist(grouping)
-        else:
-            grouping_is_valid = self._check_grouping_in_groupings(grouping)
-        item_is_valid = self._check_item_in_freelist(item)
-        return grouping_is_valid and item_is_valid
 
     def _check_item_in_freelist(self, item):
         """
