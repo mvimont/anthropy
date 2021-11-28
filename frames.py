@@ -13,7 +13,6 @@ class HomePage(tk.Frame):
         tk.Label(self, text="Welcome to AnthroPy", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.25)
         tk.Button(self, text="Create new freelist",
                   command=lambda: container.switch_frame(FreeList)).place(relheight=0.1, relwidth=0.80, relx=0.1, rely=0.5)
-        
 
 class FreeList(tk.Frame):
     def __init__(self, container):
@@ -21,7 +20,7 @@ class FreeList(tk.Frame):
         tk.Label(self, text="Create a freelist", font=('Helvetica', 18, "bold")).place(relheight=0.1, relwidth=1, rely=0.1)
         self.current_items = tk.Label(self, text=f"Current Items: {container.pilesort.freelist if len(container.pilesort.freelist) > 0 else None}")
         self.current_items.place(relheight=0.1, relwidth=1, rely=0.2)
-        self.entry = tk.Text(self, undo=True)
+        self.entry = tk.Entry(self)
         self.entry.place(relheight=0.06, relwidth=0.3, rely=0.5, relx=0.35)
         self.add_item_button = tk.Button(self, text="Add entry to freelist",
                   command=lambda: self.add_new_item(container))
@@ -29,11 +28,11 @@ class FreeList(tk.Frame):
         self.pilesort_button = tk.Button(self, text="Start Pilesort", state="disabled",
                   command=lambda: self.start_pilesort(container))
         self.pilesort_button.place(relheight=0.1, relwidth=0.3, rely=0.9, relx=0.35)
-    
+
     def add_new_item(self, container):
-        new_item = self.entry.get('1.0', tk.END).strip('\n')
+        new_item = self.entry.get().strip('\n')
         container.pilesort.add_freelist_item(new_item)
-        self.entry.delete('1.0', tk.END)
+        self.entry.delete(0, 'end')
         self.current_items.destroy()
         self.current_items = tk.Label(self, text=f"Current Items: {container.pilesort.freelist}")
         self.current_items.place(relheight=0.1, relwidth=1, rely=0.2)
